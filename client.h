@@ -12,10 +12,12 @@ class client
 	void setcolor(bool white);
 	
 	sf::Packet pack;
+	bool isMoveValue;
 private:
 	sf::IpAddress IP;
 	unsigned short port;
-	int connectionstatus;
+	int connectionstatus; //0 brak 1 proba 2 stabilizacja
+	
 	bool iswhite;
 };
 

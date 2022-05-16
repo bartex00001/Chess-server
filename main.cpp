@@ -4,48 +4,21 @@
 #include <windows.h>
 #include "client.h"
 int main()
-{	/*
-	int connectionstatus = 0;
-	sf::Packet initpacket;
-	sf::UdpSocket socket1;
-	unsigned int receivingport = 57000;
-	unsigned short senderport;
-	sf::IpAddress senderip;
-	if (socket1.bind(receivingport) != sf::Socket::Done) {
-		std::cout << "Failed to bind a socket!" << std::endl;
-		exit(4);
-	}
-	if (socket1.receive(initpacket, senderip, senderport) != sf::Socket::Done) {
-		std::cout << "Failed to recieve initialization packet!" << std::endl;
-		exit(2);
-	}
-	initpacket >> connectionstatus;
-	std::cout << connectionstatus << std::endl;
-	std::cout << senderip<<"||"<<senderport<<std::endl;
-	if (connectionstatus == 1) {
-		connectionstatus = 2;
-		initpacket.clear();
-		initpacket << connectionstatus;
-		if (socket1.send(initpacket, senderip, senderport) != sf::Socket::Done) {
-			std::cout << "Failed to send connection initialization packet!" << std::endl;
-			exit(2);
-		}
-	}
-	system("pause"); */
-
+{
 
 	client c1, c2;
 	sf::UdpSocket socket;
 	const unsigned short receivingport = 57000;
 	unsigned short senderport;
 	sf::IpAddress senderip;
-	int connection=0; //0 brak 4obaj
+	int connection=0; //0 brak 4 obaj
+	bool gamestarted = false;
 
 	if (socket.bind(receivingport) != sf::Socket::Done) {
 		std::cout << "Failed to bind a socket!" << std::endl;
 		exit(4);
 	}
-
+	//klient 1
 	if (socket.receive(c1.pack,senderip,senderport) != sf::Socket::Done) {
 		std::cout << "Failed to recieve initialization packet 1!" << std::endl;
 		exit(2);
@@ -67,6 +40,7 @@ int main()
 		std::cout << "Connected to client 1" << std::endl;
 	}
 
+	//klient 2
 	if (socket.receive(c2.pack, senderip, senderport) != sf::Socket::Done) {
 		std::cout << "Failed to recieve initialization packet 2!" << std::endl;
 		exit(2);
@@ -87,27 +61,55 @@ int main()
 		std::cout << "Connected to client 2" << std::endl;
 	}
 
+	if (connection == 4) {
+		gamestarted = true;
+		c1.pack.clear();
+		c1.pack << gamestarted;
+		if (socket.send(c1.pack, c1.getIP(), c1.getPort()) != sf::Socket::Done) {
+			std::cout << "Failed to send ready packet 1!" << std::endl;
+			exit(2);
+		}
+		c1.pack.clear();
 
-
-	bool move = true;
-	c1.pack << move;
-	if (socket.send(c1.pack, c1.getIP(), c1.getPort()) != sf::Socket::Done) {
-		std::cout << "nigger!" << std::endl;
+		c2.pack.clear();
+		c2.pack << gamestarted;
+		if (socket.send(c2.pack, c2.getIP(), c2.getPort()) != sf::Socket::Done) {
+			std::cout << "Failed to send ready packet 2!" << std::endl;
+			exit(2);
+		}
+		c2.pack.clear();
 	}
+
 	c1.pack.clear();
 	if (socket.receive(c1.pack, senderip, senderport) != sf::Socket::Done) {
-		std::cout << "niggerrr!" << std::endl;
-	}
-	unsigned short a=0;
-	float b=0, c=0;
-	c1.pack >> a>>b>>c;
-	std::cout << a << b << c;
-	c1.pack.clear();
-	c1.pack << move;
-	if (socket.send(c1.pack, c1.getIP(), c1.getPort()) != sf::Socket::Done) {
-		std::cout << "nigger2!" << std::endl;
+		std::cout << "Failed to recieve move from c1!" << std::endl;
+		exit(2);
 	}
 
+	c1.pack.clear();
+	c1.isMoveValue = true;
+	c1.pack << c1.isMoveValue;
+	if (socket.send(c1.pack, c1.getIP(), c1.getPort()) != sf::Socket::Done) {
+		std::cout << "Failed to conf packet 1!" << std::endl;
+		exit(2);
+	}
+	c1.pack.clear();
+
+
+
+	c2.pack.clear();
+	if (socket.receive(c2.pack, senderip, senderport) != sf::Socket::Done) {
+		std::cout << "Failed to recieve move from c2!" << std::endl;
+		exit(2);
+	}
+	int id = 0;
+	float x = 0, y = 600;
+	c2.pack << id << x << y;
+	if (socket.send(c2.pack, c2.getIP(), c2.getPort()) != sf::Socket::Done) {
+		std::cout << "Failed to move 2" << std::endl;
+		exit(2);
+	}
+	c2.pack.clear();
 
 	/*
 	sf::SocketSelector selec;
